@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Admin - View Account Page</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600&display=swap');
+
+        body {
+            background-color: #fff;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: "Poppins", sans-serif;
+            font-size: small;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h3 {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .view-account-page-container {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            width: 80%;
+            position: relative;
+        }
+
+        .breakline {
+            overflow: hidden;
+            background-color: #555;
+            font-size: small;
+            font-family: Arial, Helvetica, sans-serif;
+            color: white;
+            padding: 14px 16px;
+        }
+
+        .view-account-content {
+            padding: 20px;
+            border-top: none;
+            text-align: left;
+        }
+
+        .view-account-content h3 {
+            margin-top: 0;
+        }
+
+        .view-account-content table {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .view-account-table th {
+            margin-bottom: 10px;
+        }
+
+        .back-btn,
+        .logout-btn {
+            background-color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            background-color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            width: 120px;
+        }
+
+        .view-btn img,
+        .back-btn img,
+        .edit-btn img,
+        .delete-btn img {
+            width: 15px;
+            height: 15px;
+        }
+
+        .button-container form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+
+<body id="system-admin">
+    <div class="view-account-page-container">
+        <h3>System Admin Page</h3>
+        <!-- Navigation -->
+        <div class="breakline">
+            <span class="tablink">View Account</span>
+        </div>
+
+        <!-- Debugging/testing section -->
+        <span id="debug"></span>
+
+        <!-- View account page section -->
+        <div class="view-account-content" id="view-account-content">
+            <div class="button-container">
+                <!-- Update button -->
+                <form class="update-account-form" id="update-account-form">
+                    <button type="submit" class="edit-btn">
+                        <img src="../image/edit-icon.png" alt="Update">
+                        <span>&nbsp;Update&nbsp;</span>
+                    </button>
+                </form>
+
+                <!-- Suspend button -->
+                <form class="delete-account-form" id="delete-account-form">
+                    <button type="submit" class="edit-btn">
+                        <img src="../image/delete-icon.png" alt="Suspend">
+                        <span>&nbsp;Suspend&nbsp;</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Display information -->
+            <table class="view-account-table" id="view-account-table" border="0">
+                <thead>
+                    <!-- User ID -->
+                    <tr>
+                        <th style="width: 100px;"><label for="user_id">User ID:</label></th>
+                        <th>User - <span id="current_user_id"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="view-account-information"></tbody>
+            </table>
+
+            <!-- Back to admin page button -->
+            <form id="back-form" action="systemAdminPage.php" method="post">
+                <button type="submit" class="back-btn">
+                    <img src="../image/home-icon.png" alt="Home">
+                    <span>&nbsp;Back to Admin Page&nbsp;</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Logout button -->
+        <div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to parse URL parameters using regex
+
+        var user_id = new URLSearchParams(window.location.search).get('user_id');
+
+        function logout() {
+            window.location.href = 'login_page.html'; 
+            window.history.replaceState({}, document.title, '/boundary/login_page.html'); 
+        }
+
+        // Function to display the information based on user id
+        window.onload = function () {
+
+            // Get and display user_id
+
+            document.getElementById("current_user_id").innerHTML = user_id;
+
+            // Create a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+
+            // Configure the request
+            xhr.open("POST", "../controller/viewAccountPageController.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            // Define what happens on successful data submission/ if send and receive successful, alert response
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Handle successful response
+                    var response = JSON.parse(xhr.responseText);
+                        // Access and display search results
+                        var viewData = response.data;
+                            // Clear previous search results
+                            var accountInfo = document.getElementById("view-account-information");
+                            accountInfo.innerHTML = "";
+
+                            // Display account information
+                            var account = viewData[0];
+                            var output = "<tr>" +
+                                "<td>Username:</td>" +
+                                "<td>" + account.username + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>Password:</td>" +
+                                "<td>" + account.password + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>First Name:</td>" +
+                                "<td>" + account.firstName + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>Last Name:</td>" +
+                                "<td>" + account.lastName + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>Date of Birth:</td>" +
+                                "<td>" + account.dateofBirth + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>Address:</td>" +
+                                "<td>" + account.address + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td>User Profile:</td>" +
+                                "<td>" + account.userProfile + "</td>" +
+                                "</tr>";
+                            accountInfo.innerHTML += output; 
+                } else {
+                    // Handle error response
+                    console.error("Error: " + xhr.status);
+                }
+            };
+
+            // Construct the form data string
+            var formData = "user_id=" + encodeURIComponent(user_id);
+
+            // Send the request with the form data
+            xhr.send(formData);
+        };
+
+        // Direct user to update account page with corresponding user_id
+        document.getElementById("update-account-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            window.location.href = "updateAccountPage.html?user_id=" + encodeURIComponent(user_id);
+        });
+
+        // Function to delete user account
+        document.getElementById("delete-account-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Display a confirm dialog
+            var result = window.confirm("Are you sure you want to suspend your account?\nThis action cannot be undone.");
+
+            if (result) {
+                // User clicked OK
+
+                // Make a fetch request to delete the account
+                fetch("../controller/suspendAccountPageController.php?user_id=" + encodeURIComponent(user_id), {
+                    method: 'GET', // Use GET method to pass parameters through the URL
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // Parse JSON response
+                    })
+                    .then(data => {
+                        // Handle the response data
+                        alert(data.message); // Success message
+                        window.location.href = "./systemAdminPage.php"; // Redirect to Admin Page
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Error: " + error.message); // Error message
+                    });
+            } else {
+                // User clicked Cancel
+                alert("Suspend request cancelled.");
+            }
+        });
+    </script>
+</body>
+
+</html>

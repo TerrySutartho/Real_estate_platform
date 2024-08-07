@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600&display=swap');
+
+body {
+    /* background-image: url(image/desktop.jpg); */
+    background-color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: "Poppins", sans-serif;
+    font-size: small;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h3 {
+    padding: 10px;
+    text-align: center;
+}
+
+.tab-container {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    width: 80%;
+    position: relative;
+}
+
+.tabs {
+    overflow: hidden;
+    background-color: #555;
+}
+
+.tablink.active {
+    background-color: #222;
+}
+
+.tabs button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    color: white;
+}
+
+.tabs button:hover {
+    background-color: #ddd;
+}
+
+.tabcontent {
+    display: none;
+    padding: 20px;
+    border-top: none;
+    text-align: center;
+}
+
+.tabcontent h3 {
+    margin-top: 0;
+}
+
+.tabcontent table {
+    border-collapse: collapse;
+    border-color: #ccc;
+    width: 100%;
+    font-size: small;
+    text-align: center;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+    width: 80%;
+    text-align: center;
+}
+
+.search-box {
+    padding: 8px 10px;
+    width: 97%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.search-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.view-btn,
+.create-btn,
+.logout-btn {
+    background-color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+}
+
+.view-btn img {
+    width: 15px;
+    height: 15px;
+}
+
+.create-btn img {
+    width: 10px;
+    height: 10px;
+}
+
+.create-account-form input,
+.create-profile-form input {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logout-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}

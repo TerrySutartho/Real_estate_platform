@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login Page</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body id="login-page">
+	<div class="login-container">
+		<!-- Header -->
+		<h2>Welcome to PropertySensei!</h2>
+
+		<!-- Logo -->
+		<img class="logo" src="../image/logo.png" height="150" width="150" alt="Logo">
+
+		<!-- Description -->
+		<span>Log in to get the most out of your PropertySensei experience.</span>
+
+		<!-- User Type Selection -->
+		<div class="user-type">
+			<select id="user-type" name="user-type" onchange="enableLogin()">
+				<option value="" disabled selected>Login As</option>
+				<option value="Seller">Seller</option>
+				<option value="Buyer">Buyer</option>
+				<option value="REA">Real Estate Agent</option>
+				<option value="Admin">System Admin</option>
+			</select>
+		</div>
+
+		<!-- Login Form -->
+		<form id="login-form" method="post">
+			<div class="form-group">
+				<input type="text" id="username" name="username" placeholder="Username" disabled required>
+			</div>
+			<div class="form-group">
+				<input type="password" id="password" name="password" placeholder="Password" disabled required>
+			</div>
+			<div class="form-group">
+				<button type="submit" id="login-btn" onclick="login()" disabled>Login</button>
+			</div>
+		</form>
+	</div>
+
+	<!-- JavaScript for enabling login and setting form action -->
+	<script>
+		function enableLogin() {
+			// Get the selected user type
+			var ref = document.getElementById("user-type").value;
+	
+			// Enable form elements if a user type is selected
+			if (ref != "") {
+				document.getElementById("username").disabled = false;
+				document.getElementById("password").disabled = false;
+				document.getElementById("login-btn").disabled = false;
+			}
+		}
+		
+		function movePage(ref,user_id){
+			// Set action attribute of form based on selected user type
+			var formAction;
+			switch (ref) {
+				case "Seller":
+					formAction = "viewSellerPropertiesPage.html?seller_id=" + user_id;;
+					break;
+				case "Buyer":
+					formAction = "viewAllPropertiesPage.html";
+					break;
+				case "REA":
+					formAction = formAction = "viewPropertyListing.html?agent_id=" + user_id;
+					break;
+				case "Admin":
+					formAction = "systemAdminPage.php";
+					break;
+				default:
+					formAction = "#"; // Default action
+			}
+			window.location.href = formAction;
+		}
+		// Add event listener to the login form
+		function login(){
+			event.preventDefault(); // Prevent the default form submission
+			
+			// Get username and password values
+			var username = document.getElementById("username").value;
+			var password = document.getElementById("password").value;
+			var ref = document.getElementById("user-type").value;
+
+			// Create a new XMLHttpRequest object
+			var xhr = new XMLHttpRequest();
+	
+			// Configure the request
+			xhr.open("POST", "../controller/loginController.php", true);
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+			// Define what happens on successful data submission/ if send and receive successful, alert response
+			xhr.onload = function() {
+				if (xhr.status === 200) {
+					// Handle successful response
+					var response = JSON.parse(xhr.responseText);
+					if (response.success){
+						alert("Login Successful!")
+						movePage(ref, response.data);
+					}
+					else
+						alert(response.data); // Display the response message in an alert box
+				} else {
+					// Handle error response
+					console.error("Error: " + xhr.status);
+				}
+			};
+	
+			// Send the request with the form data
+			xhr.send("userName=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) +"&user-type=" + encodeURIComponent(ref));
+		};
+	</script>
+	
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>View reviews</title>
+        <link rel="stylesheet" href="style.css"> <!-- Link to external CSS file -->
+    </head>
+    
+    <body onload="onPageload()">
+            <!-- Logo -->
+            <img class="logo" src="../image/logo.png" height="150" width="150" alt="Real Estate System Logo">
+            <!-- Navigation Bar -->
+            <nav>
+                <ul>
+                    <li><a id="viewListings" href="#">View Listings</a></li>
+                    <li><a id="viewRatings" href="#">View Ratings</a></li>
+                    <li><a id="viewReviews" href="#">View Reviews</a></li>
+                    <li><a id="createListing" href="#">Create Listing</a></li>
+                </ul>
+            </nav>
+            <input type="hidden" id="agent_id" name="agent_id">
+    <h1>Agent Reviews</h1>
+    <span id='myId'>Agent ID:  </span><br>
+    <button onclick="fetchReviews()">Load Reviews</button>
+    <span id = 'notFound'></span>
+    <div class="result-container">
+        <div class="scrollable-container">
+            <table id ="resultTable"></table>
+        </div>
+    </div>
+    
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    
+    <script>
+       var agent_id = new URLSearchParams(window.location.search).get("agent_id");
+
+    function onPageload() {
+        document.getElementById('viewListings').href = "viewPropertyListing.html?agent_id=" + agent_id;
+        document.getElementById('viewRatings').href = "viewRatings.html?agent_id=" + agent_id;
+        document.getElementById('viewReviews').href = "viewReviews.html?agent_id=" + agent_id;
+        document.getElementById('createListing').href = "createPropertyListing.html?agent_id=" + agent_id;
+        document.getElementById('myId').innerHTML = "Agent ID: " + agent_id;
+    }
+
+    function fetchReviews() {
+        fetch('../controller/viewReviewController.php?agent_id=' + encodeURIComponent(agent_id))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data.success == false){
+                document.getElementById('notFound').innerHTML = data.data;
+            }
+            if(data.success == true){
+                var resultHTML = '<tr><th> Review ID</th><th>Review</th></tr>'
+                data.data.forEach(review=>{
+                    resultHTML += '<tr><td>' + review.review_id 
+                                + '</td><td>' + review.review + '</td>';
+                });
+                document.getElementById("resultTable").innerHTML = resultHTML;
+                document.getElementById('notFound').innerHTML = '';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load reviews. See console for details.');
+        });
+    }
+    
+    function logout() {
+            window.location.href = 'login_page.html'; 
+            window.history.pushState({}, document.title, '/boundary/login_page.html'); 
+    }
+    </script>
+</body>
+</html>

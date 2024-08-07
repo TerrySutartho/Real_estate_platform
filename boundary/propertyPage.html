@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Property</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="onPageload()">
+    <header>
+        <!-- Logo -->
+        <img class="logo" src="../image/logo.png" height="150" width="150" alt="Real Estate System Logo">
+        <!-- Navigation Bar -->
+        <nav>
+            <ul>
+                <ul>
+                    <li><a id="viewListings" href="viewPropertyListing.html">View Listings</a></li>
+                    <li><a id="viewRatings" href="viewRatings.html">View Ratings</a></li>
+                    <li><a id="viewReviews" href="viewReviews.html">View Reviews</a></li>
+                    <li><a id="createListing" href="createPropertyListing.html">Create Listing</a></li>
+                </ul>
+            </ul>
+            <input type="hidden" id="agent_id" name="agent_id">
+        </nav>
+    </header>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+    <div id="listingDetails"></div>
+
+    <script>
+        // Utility function to retrieve query parameter by name
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get `agent_id` and `property_id` from the URL
+        const agent_id = getQueryParam('agent_id');
+        const property_id = getQueryParam('property_id');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display messages
+            const message = getQueryParam('message');
+            if (message) {
+                document.getElementById('listingDetails').innerHTML = '<p>' + decodeURIComponent(message) + '</p>';
+            }
+
+            // Fetch property details
+            const property_id = getQueryParam('property_id');
+            if (property_id) {
+                fetchPropertyDetails(property_id);
+            } else {
+                document.getElementById('listingDetails').innerHTML = '<p>No property ID provided.</p>';
+            }
+        });
+        // Fetch property details from the server
+        function fetchPropertyDetails(property_id) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../controller/viewPropertyListingController.php?property_id=' + encodeURIComponent(property_id), true);
+
+            // Define what happens on successful data submission
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            displayPropertyDetails(response.data);
+                        } else {
+                            document.getElementById('listingDetails').innerHTML = `<p>${response.message}</p>`;
+                        }
+                    } catch (e) {
+                        document.getElementById('listingDetails').innerHTML = '<p>Error parsing response. Please check the format of the returned data.</p>';
+                    }
+                } else {
+                    document.getElementById('listingDetails').innerHTML = '<p>Error loading property details. Server responded with status: ' + xhr.status + '</p>';
+                }
+            };
+
+            // Define what happens in case of an error
+            xhr.onerror = function() {
+                document.getElementById('listingDetails').innerHTML = '<p>Network error occurred. Unable to connect to server.</p>';
+            };
+
+            // Set up a handler that is called when the request cannot be completed due to a timeout
+            xhr.ontimeout = function() {
+                document.getElementById('listingDetails').innerHTML = '<p>Request timed out. The server took too long to respond.</p>';
+            };
+
+            // Configure the timeout in milliseconds
+            xhr.timeout = 5000; // Set timeout to 5 seconds
+
+            xhr.send();
+        }
+
+        // Display the property details in HTML
+        function displayPropertyDetails(detail) {
+            const detailsHTML = `
+                <div>
+                    <h1>Property Details</h1>
+                    <p><strong>Address:</strong> ${detail.address}</p>
+                    <p><strong>Price:</strong> $${detail.price}</p>
+                    <p><strong>Posted on:</strong> ${detail.post_date}</p>
+                    <p><strong>Conditions:</strong> ${detail.conditions}</p>
+                    <p><strong>Views:</strong> ${detail.views}</p>
+                    <button onclick="updateProperty(${detail.property_id})">Update</button>
+                    <button onclick="deleteProperty(${detail.property_id})">Delete</button>
+                </div>
+            `;
+            document.getElementById('listingDetails').innerHTML = detailsHTML;
+        }
+
+        function updateProperty(property_id) {
+            window.location.href = 'updatePropertyListing.html?property_id=' + encodeURIComponent(property_id) + '&agent_id=' + encodeURIComponent(agent_id);
+        }
+
+        function deleteProperty(property_id) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '../controller/deletePropertyController.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    alert('Property Deleted')
+                    window.location.href = 'propertypage.html?agent_id=' + encodeURIComponent(agent_id) + '&message=Property deleted successfully';
+                }
+            } else {
+                alert('Error deleting property: ' + xhr.statusText);
+            }
+        };
+        
+        xhr.onerror = function() {
+            alert('Network error occurred. Unable to connect to server.');
+        };
+        
+        xhr.send('property_id=' + encodeURIComponent(property_id));
+    }
+
+        function logout() {
+            window.location.href = 'login_page.html';
+            window.history.replaceState({}, document.title, '/boundary/login_page.html');
+        }
+
+        function onPageload() {
+            document.getElementById('viewListings').href = "viewPropertyListing.html?agent_id=" + agent_id;
+            document.getElementById('viewRatings').href = "viewRatings.html?agent_id=" + agent_id;
+            document.getElementById('viewReviews').href = "viewReviews.html?agent_id=" + agent_id;
+            document.getElementById('createListing').href = "createPropertyListing.html?agent_id=" + agent_id;
+        }
+    </script>
+</body>
+</html>

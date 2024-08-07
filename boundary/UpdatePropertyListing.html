@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Property Listing</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to external CSS file -->
+</head>
+
+<body>
+    <header>
+        <!-- Logo -->
+        <img class="logo" src="../image/logo.png" height="150" width="150" alt="Real Estate System Logo">
+        <!-- Navigation Bar -->
+        <nav>
+            <ul>
+                <ul>
+                    <li><a id="viewListings" href="viewPropertyListing.html">View Listings</a></li>
+                    <li><a id="viewRatings" href="viewRatings.html">View Ratings</a></li>
+                    <li><a id="viewReviews" href="viewReviews.html">View Reviews</a></li>
+                    <li><a id="createListing" href="createPropertyListing.html">Create Listing</a></li>
+                </ul>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Update Property Listing</h1>
+        <form id="updateForm" onsubmit="return false;">
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" required>
+            <label for="price">Price:</label>
+            <input type="text" id="price" name="price" pattern="[0-9]*"required>
+            <input type="hidden" id="agent_id" name="agent_id">
+            <button type="button" onclick="submitUpdate()">Update Listing</button>
+        </form>
+        <div id="message"></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const agentId = getQueryParam('agent_id');
+                if (agentId) {
+                    document.getElementById('agent_id').value = agentId;
+                }
+
+                // Update all navigation links with the `agent_id` parameter
+                var links = document.querySelectorAll('nav ul li a');
+                links.forEach(link => {
+                    var url = new URL(link.href, window.location.origin);
+                    url.searchParams.set("agent_id", agentId); // Add or replace the `agent_id`
+                    link.href = url;
+                });
+            });
+            
+            document.getElementById("price").addEventListener("input", function(event) {
+                // Remove non-numeric characters from the input value
+                this.value = this.value.replace(/[^0-9]/g, "");
+            });
+
+            function getQueryParam(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+            
+            function submitUpdate() {
+                var propertyId = getQueryParam('property_id');
+                var agentId = document.getElementById('agent_id').value; // Get agent ID from hidden input
+                var address = document.getElementById('address').value;
+                var price = document.getElementById('price').value;
+            
+                if (!propertyId) {
+                    alert("Property ID is missing in the URL");
+                    return;
+                }
+            
+                var formData = new FormData();
+                formData.append('property_id', propertyId);
+                formData.append('address', address);
+                formData.append('price', price);
+            
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '../controller/UpdatePropertyListingController.php', true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                window.location.href = 'propertyPage.html?property_id=' + encodeURIComponent(propertyId) + '&agent_id=' + encodeURIComponent(agentId);
+                            } else {
+                                alert(response.message);
+                            }
+                        } catch (e) {
+                            alert('Error parsing server response. Please try again.');
+                        }
+                    } else {
+                        alert('Error updating property: ' + xhr.statusText);
+                    }
+                };
+                xhr.send(formData);
+            }
+            
+            function logout() {
+                window.location.href = 'login_page.html'; 
+                window.history.replaceState({}, document.title, '/boundary/login_page.html'); 
+            }
+            </script>
+    </div>
+</body>
+</html>
