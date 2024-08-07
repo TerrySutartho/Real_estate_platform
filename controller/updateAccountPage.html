@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Admin - Update Account Page</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600&display=swap');
+
+        body {
+            background-color: #fff;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: "Poppins", sans-serif;
+            font-size: small;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h3 {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .update-account-page-container {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            width: 80%;
+            position: relative;
+        }
+
+        .breakline {
+            overflow: hidden;
+            background-color: #555;
+            font-size: small;
+            font-family: Arial, Helvetica, sans-serif;
+            color: white;
+            padding: 14px 16px;
+        }
+
+        .update-account-content {
+            padding: 20px;
+            border-top: none;
+            text-align: left;
+        }
+
+        .update-account-content h3 {
+            margin-top: 0;
+        }
+
+        .update-account-table input,
+        .update-account-table select {
+            width: 100%;
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .update-btn,
+        .logout-btn {
+            background-color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+
+<body id="system-admin">
+    <div class="update-account-page-container">
+        <h3>System Admin Page</h3>
+        <!-- Navigation -->
+        <div class="breakline">
+            <span class="tablink">Update Account</span>
+        </div>
+
+        <!-- Debugging/testing section -->
+        <span id="debug"></span>
+
+        <!-- update account form section -->
+        <div id="update-account-content" class="update-account-content">
+            <form class="update-account-form" id="update-account-form">
+                <table class="update-account-table" border="0">
+                    <!-- User ID -->
+                    <tr>
+                        <th style="width: 100px;"><label for="user_id">User ID:</label></th>
+                        <th>User - <span id="current_user_id"></span></th>
+                    </tr>
+                    <!-- Username -->
+                    <tr>
+                        <td style="width: 100px;"><label for="username">Username:</label></td>
+                        <td><input type="text" name="username" id="username" style="margin-top: 5px;" required></td>
+                    </tr>
+                    <!-- Password -->
+                    <tr>
+                        <td><label for="password">Password:</label></td>
+                        <td><input type="password" name="password" id="password" required></td>
+                    </tr>
+                    <!-- First Name -->
+                    <tr>
+                        <td><label for="firstName">First Name:</label></td>
+                        <td><input type="text" name="firstName" id="firstName" pattern="[A-Za-z ]+" title="Please enter valid name with letters only!" required></td>
+                    </tr>
+                    <!-- Last Name -->
+                    <tr>
+                        <td><label for="lastName">Last Name:</label></td>
+                        <td><input type="text" name="lastName" id="lastName" pattern="[A-Za-z ]+" title="Please enter valid name with letters only!" required></td>
+                    </tr>
+                    <!-- Date of Birth -->
+                    <tr>
+                        <td><label for="dateofBirth">Date of Birth:</label></td>
+                        <td><input type="date" name="dateofBirth" id="dateofBirth" required></td>
+                    </tr>
+                    <!-- Address -->
+                    <tr>
+                        <td><label for="address">Address:</label></td>
+                        <td><input type="text" name="address" id="address" required></td>
+                    </tr>
+                    <!-- User Type Selection -->
+                    <tr>
+                        <td><label for="userProfile">User Profile:</label></td>
+                        <td>
+                            <select id="userProfile" name="userProfile" required>
+                                <option value="" disabled selected></option>
+                                <option value="Seller">Seller</option>
+                                <option value="Buyer">Buyer</option>
+                                <option value="REA">Real Estate Agent</option>
+                                <option value="Admin">System Admin</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <!-- Submit Button -->
+                <button type="submit" class="update-btn" style="margin-top: 10px;">Save Update(s)</button>
+            </form>
+        </div>
+
+        <!-- Logout button -->
+        <div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        
+        function logout() {
+            window.location.href = 'login_page.html'; 
+            window.history.replaceState({}, document.title, '/boundary/login_page.html'); 
+        }
+
+        // Function to display user_id
+        window.onload = function () {
+            document.getElementById("current_user_id").innerHTML = getUrlParameter('user_id');
+        };
+
+        // Function to parse URL parameters using regex
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        };
+
+        document.getElementById("update-account-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get form data
+            var formData = new FormData(document.getElementById("update-account-form"));
+
+            // Create a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+
+            // Configure the request
+            xhr.open("POST", "../controller/updateAccountPageController.php", true);
+
+            // Define what happens on successful data submission
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        alert(response.message); // Success message
+                        
+                        // Redirect to update account page
+                        var user_id = getUrlParameter('user_id');
+                        window.location.href = "viewAccountPage.html?user_id=" + encodeURIComponent(user_id);
+                    } else {
+                        alert(response.message); // Error message
+                        document.getElementById("update-account-form").reset(); // Reset the form
+                    }
+                } else {
+                    alert("Error: " + xhr.status);
+                }
+            };
+
+            // Send the request with user_id and form data
+            formData.append("user_id", getUrlParameter('user_id')); // Append user_id to formData
+
+            // Display form data for debugging
+            // var formDataDisplay = "";
+            // for (var pair of formData.entries()) {
+            //     formDataDisplay += pair[0] + ': ' + pair[1] + '<br>';
+            // }
+            // document.getElementById("debug").innerHTML = formDataDisplay;
+
+            xhr.send(formData); // Send formData
+        });
+    </script>
+</body>
+
+</html>

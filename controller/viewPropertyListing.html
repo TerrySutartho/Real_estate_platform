@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Property Listing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="onPageload()">
+    <!-- Logo -->
+    <img class="logo" src="../image/logo.png" height="150" width="150" alt="Real Estate System Logo">
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a id="viewListings" href="#">View Listings</a></li>
+            <li><a id="viewRatings" href="#">View Ratings</a></li>
+            <li><a id="viewReviews" href="#">View Reviews</a></li>
+            <li><a id="createListing" href="#">Create Listing</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>View Property Listing</h1>
+        <form onsubmit="return fetchProperties();">
+            <label for="address">Property Address:</label>
+            <input type="text" id="address" name="address" required>
+            <button type="submit">Search Listing</button>
+        </form>
+        <div id="results"></div><br>
+    </div>
+    <button id = 'viewProp' onclick="getProp()">View All My Properties</button>
+    <div class="result-container">
+        <div class="scrollable-container">
+            <table id ="resultTable"></table>
+        </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+<script>
+    var agent_id = new URLSearchParams(window.location.search).get("agent_id");
+
+    function onPageload() {
+        document.getElementById('viewListings').href = "viewPropertyListing.html?agent_id=" + agent_id;
+        document.getElementById('viewRatings').href = "viewRatings.html?agent_id=" + agent_id;
+        document.getElementById('viewReviews').href = "viewReviews.html?agent_id=" + agent_id;
+        document.getElementById('createListing').href = "createPropertyListing.html?agent_id=" + agent_id;
+    }
+    
+    function fetchProperties() {
+        const address = document.getElementById('address').value;
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '../controller/getPropertyListingController.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                temp = "";
+                var response = JSON.parse(xhr.responseText);
+                if (response.success){
+                    var prop = response.data;
+                    prop.forEach(function(prop){
+                        temp += "<div><a href='../boundary/propertyPage.html?agent_id="
+                            + agent_id + "&property_id=" + prop.property_id + "'>" + prop.address + "- View Details</a></div>";
+                    });
+                    document.getElementById("results").innerHTML = temp;
+					}
+				else{
+					alert(response.data);
+                    document.getElementById('results').innerHTML = response.data;
+                }
+            }
+        };
+        xhr.send('address=' + encodeURIComponent(address) + '&agent_id=' + encodeURIComponent(agent_id));
+        return false; // Prevent form submission
+    }
+
+    function logout() {
+        window.location.href = 'login_page.html'; 
+        window.history.replaceState({}, document.title, '/boundary/login_page.html'); 
+    }
+
+    function getProp(){
+        event.preventDefault(); // Prevent the default form submission
+
+        // Create a new XMLHttpRequest object
+        var xhr = new XMLHttpRequest();
+
+        // Configure the request 
+        xhr.open("POST", "../controller/viewMyProp.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        // Define what happens on successful data submission/ if send and receive successful, alert response
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    var prop = response.data;
+                    var resultHTML = '<tr><th>Property Id</th><th>Agent Id</th><th>Seller Id</th><th>Post Date</th><th>Address</th><th>Price</th></tr>';
+                    prop.forEach(function(prop) {
+                        resultHTML += '<tr onclick="detailPage('+ prop.property_id +')"><td>' + prop.property_id 
+                                    + '</td><td>' + prop.agent_id
+                                    + '</td><td>' + prop.seller_id 
+                                    + '</td><td>' + prop.post_date
+                                    + '</td><td>' + prop.address
+                                    + '</td><td>' + prop.price
+                                    + '</td></tr>';
+                    });
+                    document.getElementById("resultTable").innerHTML = resultHTML;
+                }
+            }else {
+                console.error("Error: " + xhr.status);
+            }
+        };
+        xhr.send("agent_id=" + encodeURIComponent(agent_id));
+    };
+
+    function detailPage(prop_id){
+        window.location.href = "propertyPage.html?agent_id=" + agent_id + "&property_id=" + prop_id;
+    }
+</script>
+</body>
+</html>
