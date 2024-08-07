@@ -4,8 +4,8 @@ class database{
 
     private $jdbcurl = "localhost";
     private $jdbcname = "root";
-    private $jdbcpass = "12345678";
-    private $dbname = "csci314";
+    private $jdbcpass = "";
+    private $dbname = "REAplatform";
 
     public function getURL(){
         return $this->jdbcurl;
